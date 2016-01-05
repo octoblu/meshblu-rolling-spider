@@ -1,7 +1,7 @@
 {
   "name": "meshblu-rolling-spider",
   "repository": "octoblu/meshblu-rolling-spider",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "connector.js",
   "scripts": {
     "preinstall": "node -e \"try{require('./skip-install.js')}catch(e){}\"",

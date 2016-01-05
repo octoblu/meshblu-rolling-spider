@@ -17,6 +17,8 @@ MESSAGE_SCHEMA =
         'land'
         'up'
         'down'
+        'forward'
+        'backward'
         'turnLeft'
         'turnRight'
         'tiltLeft'
