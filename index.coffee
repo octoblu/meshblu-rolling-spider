@@ -2,6 +2,8 @@
 util           = require 'util'
 {EventEmitter} = require 'events'
 debug          = require('debug')('meshblu-rolling-spider')
+Drone = require('rolling-spider')
+
 
 MESSAGE_SCHEMA =
   type: 'object'
@@ -37,6 +39,8 @@ OPTIONS_SCHEMA =
       required: false
 
 class Plugin extends EventEmitter
+  spider = {}
+
   constructor: ->
     @options = {}
     @messageSchema = MESSAGE_SCHEMA
@@ -45,7 +49,7 @@ class Plugin extends EventEmitter
   ACTIVE = false
   STEPS = 2
 
-  cooldown = ->
+  cooldown: () =>
     ACTIVE = false
     setTimeout (->
       ACTIVE = true
@@ -53,60 +57,49 @@ class Plugin extends EventEmitter
 
   onMessage: (message) =>
     payload = message.payload
+    @droneCommand(payload.command)
 
   droneCommand: (command) =>
       if ACTIVE
-        if command == 'connect'
-          response =
-            devices: ['*']
-            payload: 'already_active'
-          @emit 'message', response
-        else if command == 'disconnect'
-          disconnectDrone()
+        if command == 'disconnect'
+          @disconnectDrone()
         else if command == 'takeOff'
-          d.flatTrim()
-          d.takeOff()
-          d.cooldown()
+          spider.flatTrim()
+          spider.takeOff()
+          @cooldown()
         else if command == 'land'
-          d.land()
+          spider.land()
         else
-          d[command]()
-          cooldown()
-      else
+          spider[command]()
+          @cooldown()
+      else if !ACTIVE
         if command == 'connect'
-          connectDrone(@options.localName)
+          @connectDrone(@options.localName)
 
 
   onConfig: (device) =>
     @setOptions device.options
 
-  connectDrone: (droneOptions) =>
-    droneOptions = droneOptions || {}
-    d = new Drone(droneOptions)
-    d.connect ->
-      d.setup ->
-        console.log 'Configured for Rolling Spider! ', d.name
-        d.flatTrim()
-        d.startPing()
-        d.flatTrim()
+  connectDrone: (droneOptions={}) =>
+    spider =  new Drone(droneOptions)
 
-        d.on 'stateChange', ->
-          response =
-            devices: ['*']
-            payload: d.status.flying then '-- flying' else '-- down'
-          @emit 'message', response
+    spider.connect ->
+      spider.setup ->
+        console.log 'Configured for Rolling Spider! ', spider.name
+        spider.flatTrim()
+        spider.startPing()
+        spider.flatTrim()
 
         setTimeout (->
           console.log 'ready for flight'
-          response =
-            devices: ['*']
-            payload: 'flight_ready'
-          @emit 'message', response
           ACTIVE = true
         ), 1000
 
+
     disconnectDrone: () =>
-      d.disconnect()
+      spider.disconnect() ->
+        console.log 'disconnected drone'
+
       ACTIVE = false
 
   setOptions: (options={}) =>
