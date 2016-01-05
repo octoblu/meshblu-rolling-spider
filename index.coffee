@@ -53,9 +53,9 @@ class Plugin extends EventEmitter
 
   cooldown: () =>
     ACTIVE = false
-    setTimeout (->
+    setTimeout ->
       ACTIVE = true
-    ), STEPS * 12
+    , STEPS * 12
 
   onMessage: (message) =>
     payload = message.payload
@@ -72,7 +72,7 @@ class Plugin extends EventEmitter
         else if command == 'land'
           spider.land()
         else
-          spider[command]()
+          spider[command] steps: STEPS
           @cooldown()
       else if !ACTIVE
         if command == 'connect'
