@@ -131,9 +131,7 @@ class Plugin extends EventEmitter
 
      spider.on 'assembled', ->
       spider.flatTrim()
-      spider.startPing()
       spider.flatTrim()
-      
       setTimeout (->
         console.log 'ready for flight'
         ACTIVE = true
