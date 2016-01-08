@@ -124,8 +124,8 @@ class Plugin extends EventEmitter
           ACTIVE = true
         ), 1000
 
-   connectSwarm: (members) =>
-     spider = new Drone.Swarm({membership: members, timeout: 20});
+   connectSwarm: (members=[]) =>
+     spider = new Drone.Swarm({membership: members, timeout: 10});
 
      spider.assemble()
 
