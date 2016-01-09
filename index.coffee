@@ -32,6 +32,10 @@ MESSAGE_SCHEMA =
         'release'
       ]
       required: true
+    steps:
+      type: 'number'
+      title: 'STEPS (How long to run the command - defaults to 2)'
+      default: 2
     specific:
       title: 'Message specific drone? (if swarm)'
       type: 'boolean'
@@ -97,9 +101,11 @@ class Plugin extends EventEmitter
       else if command == 'land'
         spider.land()
       else
+        STEPS = STEPS || payload.steps
         spider[command] steps: STEPS unless @options.swarm == true && specific == true
         spider.at(memberId)[command] steps: STEPS
         @cooldown()
+        STEPS = 2
     else if !ACTIVE
       if command == 'connect'
         @connectDrone(@options.drones[0]) unless @options.swarm == true
